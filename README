@@ -1,0 +1,73 @@
+== Info ==
+
+Cellular automaton generator, written in 2008 by Adam Michalik
+<adam@michalik.es> while learning Common Lisp.
+
+== Basic usage ==
+
+* (run-automaton automaton pattern &key (cell-size 10)
+                                        (grid-height 30)
+                                        (grid-width 30)
+                                        (sleep-time 1))
+
+  Runs automaton specified by `automaton' with `pattern' as base
+  pattern.
+
+
+* (pattern-from-file filename automaton)
+
+  Reads pattern from `filename' using rules specified by `automaton'
+
+=== Default automatons ===
+
+* *conway-life* - Conway's Game of Life
+* *wireworld* - Wireworld
+
+
+== Creating your own automaton ==
+
+These are the definitions of built-in automatons
+
+(defparameter *conway-life* 
+  (make-automaton :name "Conway's Game of Life"
+                  :states '((:dead (255 255 255 255) #\ ) (:alive (0 0 0 255) #\x))
+                  :default-state :dead
+                  :rules (list
+                          (count-neighbours-rule :alive :alive :dead 
+                                                 (lambda (count) 
+                                                   (or (< count 2) (> count 3))))
+                          (count-neighbours-rule :dead :alive :alive 
+                                                 (lambda (count)
+                                                   (= count 3))))))
+
+(defparameter *wireworld*
+  (make-automaton :name "Wireworld"
+                  :states '((:empty (0 0 0 255) #\ ) (:wire (255 255 0 255) #\-)
+                            (:head (255 0 0 255) #\|) (:tail (0 0 255 255) #\=))
+                  :default-state :empty
+                  :rules (list
+                          (simple-change-rule :tail :wire)
+                          (simple-change-rule :head :tail)
+                          (count-neighbours-rule :wire :head :head 
+                                                 (lambda (count) 
+                                                   (or (= count 1) (= count 2)))))))
+
+
+== Patterns ==
+
+You can read patterns from files. Each character represents one cell. 
+The following represents Life's glider:
+
+   x
+    x
+  xxx
+
+As declared in the definition of the automaton, spaces represent dead cells and 
+`x'-s alive ones. You can similarly declare patterns for Wireworld (clock generator):
+
+   ----=|--
+  -        ----
+   --------
+
+That's all. You can look up the source code for more information.
+

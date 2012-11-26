@@ -1,0 +1,18 @@
+(in-package :cellular)
+
+(defun count-neighbours-rule (current-state neigh-state new-state tester)
+  (flet ((count-neighbours (cell grid automaton)
+	   (when (eq (state-name (cell-state cell)) current-state)
+	     (let ((neighbours (cell-neighbours cell grid)))
+	       (when (funcall tester (count-if (lambda (x) 
+						 (eq (state-name (cell-state x)) neigh-state))
+					       neighbours))
+		 (set-new-state cell automaton new-state))))))
+    #'count-neighbours))
+
+(defun simple-change-rule (current-state new-state)
+  (flet ((simple-change (cell grid automaton)
+	   (declare (ignore grid))
+	   (when (eq (state-name (cell-state cell)) current-state)
+	     (set-new-state cell automaton new-state))))
+    #'simple-change))
